@@ -24,7 +24,7 @@ if [ "$1" = "clean" ]; then
   echo "...done cleaning"
 fi
 
-if [ "$1" == "preprocess" ] || [ "$1" = "all" ]; then
+if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] ||  [ "$1" = "run_naive" ] ;  then
   echo "preprocessing..."
   cp $ORIG_DATA $PP_DATA
   echo "...done copying"
@@ -48,7 +48,7 @@ if [ "$1" == "preprocess" ] || [ "$1" = "all" ]; then
   echo "...done preprocessing"
 fi
 
-if [ "$1" == "compile" ] || [ "$1" == "all" ]; then
+if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] ||  [ "$1" = "run_naive" ] ;  then
   echo "compiling..."
   g++ -std=c++11 -I seqan-library-2.1.1/include/ opt/run_lut.c build_bwt_index/file.cpp -o opt/run_lut
   if [ $? -ne 0 ]; then
@@ -84,14 +84,14 @@ if [ "$1" == "compile" ] || [ "$1" == "all" ]; then
   echo "...done compiling"
 fi
 
-if [ "$1" == "build_index" ] || [ "$1" == "all" ]; then
+if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] || [ "$1" = "run_naive" ];  then
   echo "building compressed FM Index..."
   time ./build_bwt_index/bwtbuildbinarybwt $PP_DATA 1 $BWT_FILE $LUT_FILE
   time ./build_bwt_index/bwt-build-with-cp.8bit.32 $BWT_FILE $PP_DATA
   echo "...done building compressed FM Index..."
 fi
 
-if [ "$1" == "create_queries" ] || [ "$1" == "all" ]; then
+if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] ||  [ "$1" = "run_naive" ] ;  then
   echo "creating queries..."
   python2.7 ./data/selectQueries.anyLength.py $PP_DATA 1000 $SMALL > $SMALL_QUERY
   python2.7 ./data/selectQueries.anyLength.py $PP_DATA 1000 $BIG > $BIG_QUERY
@@ -104,7 +104,7 @@ if [ "$1" = "run_lut" ];  then
   echo " .... done running lut"
 fi
 
-if [ "$1" = "run_rmi" ] || [ "$1" == "all" ]; then
+if [ "$1" = "run_rmi" ]; then
   echo "running rmi.... "
   time python3 ./learned_index/train.py $BWT_FILE $PP_DATA $SMALL_QUERY $SMALL $RMI_OUTPUT_FILE
   echo " .... done running rmi"
@@ -116,19 +116,27 @@ if [ "$1" = "run_naive" ]; then
   echo "...done running"
   tail -1 $OUTPUT_FILE
 fi
-  
-if [ "$1" = "run_lut" ] || [ "$1" == "all" ]; then
-  echo "running optimized BWT implementation on small queries..."
+
+if [ "$1" = "run_rmi" ]; then
+  echo "running RMI implementation on small queries..."
   t=1
   time ./opt/bwt-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t $RMI_OUTPUT_FILE > $OUTPUT_FILE
   echo "...done running"
   cat $OUTPUT_FILE
 fi
 
-# if [ "$1" = "all" ]; then
-#   echo "running optimized BWT implementation on small queries..."
-#   t=4
-#   time ./opt/bwt-clean-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t > $OUTPUT_FILE
-#   echo "...done running"
-#   cat $OUTPUT_FILE
-# fi
+if [ "$1" = "run_lut" ]; then
+  echo "running LUT implementation on small queries..."
+  t=1
+  time ./opt/bwt-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t $LUT_OUTPUT_FILE > $OUTPUT_FILE
+  echo "...done running"
+  cat $OUTPUT_FILE
+fi
+
+if [ "$1" = "run_opt" ]; then
+   echo "running optimized BWT implementation on small queries..."
+   t=4
+   time ./opt/bwt-clean-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t > $OUTPUT_FILE
+   echo "...done running"
+   cat $OUTPUT_FILE
+fi
