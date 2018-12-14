@@ -84,7 +84,7 @@ if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] ||  [ "
   echo "...done compiling"
 fi
 
-if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] || [ $1 = "run_naive" ];  then
+if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] || [ "$1" = "run_naive" ];  then
   echo "building compressed FM Index..."
   time ./build_bwt_index/bwtbuildbinarybwt $PP_DATA 1 $BWT_FILE $LUT_FILE
   time ./build_bwt_index/bwt-build-with-cp.8bit.32 $BWT_FILE $PP_DATA
