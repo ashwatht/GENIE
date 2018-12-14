@@ -224,8 +224,6 @@ typedef struct checkpoint_occ
 
 #endif
 
-#define LUT_KEYSIZE 21
-
 typedef struct batch_meta
 {
     uint32_t k, l;
@@ -272,7 +270,7 @@ void exact_match(CP_OCC *cp_occ, CP_OCC *cp_occ2,
                  uint8_t *enc_qdb0, uint8_t *enc_qdb1,
                  int64_t query_db_size, uint32_t readlength,
                  uint32_t *k_l_range0,
-                 int32_t batch_size, int32_t numthreads, uint32_t *lutput)
+                 int32_t batch_size, int32_t numthreads, uint32_t *lutput, int lutkeysize)
 {
     uint8_t c_bcast_array[256] __attribute__((aligned(64)));
     int64_t i;
@@ -343,7 +341,7 @@ void exact_match(CP_OCC *cp_occ, CP_OCC *cp_occ2,
             m.k = lutput[2 * rid];
             m.l = lutput[2 * rid + 1];
             m.rid = rid;
-            m.cur_ind = readlength - LUT_KEYSIZE - 1;
+            m.cur_ind = readlength - lutkeysize - 1;
             metadata[ii] = m;
         }
         int64_t next_read = first + batch_size;
@@ -370,7 +368,7 @@ void exact_match(CP_OCC *cp_occ, CP_OCC *cp_occ2,
                         m.k = lutput[2 * next_read];
                         m.l = lutput[2 * next_read + 1];
                         m.rid = next_read;
-                        m.cur_ind = readlength - LUT_KEYSIZE - 1;
+                        m.cur_ind = readlength - lutkeysize - 1;
                         metadata[ii] = m;
                         next_read++;
                     }
@@ -424,7 +422,7 @@ void exact_match(CP_OCC *cp_occ, CP_OCC *cp_occ2,
                         m.k = lutput[2 * next_read];
                         m.l = lutput[2 * next_read + 1];
                         m.rid = next_read;
-                        m.cur_ind = readlength - LUT_KEYSIZE - 1;
+                        m.cur_ind = readlength - lutkeysize - 1;
                         metadata[ii] = m;
                         next_read++;
                     }
@@ -474,11 +472,14 @@ int main(int argc, char **argv) {
         printf("\n");
     }
     printf("TID_SECOND_NUMA = %d\n", TID_SECOND_NUMA);
-    if(argc != 9)
+    if(argc != 10)
     {
-        printf("Need 8 arguments : indexfile query_set referencesequence.fa batch_size readlength z n_threads lutputfile\n");
+        printf("Need 9 arguments : indexfile query_set referencesequence.fa batch_size readlength z n_threads lutputfile lutkeysize\n");
         return 1;
     }
+
+    int lutkeysize = atoi(argv[9]);
+
     int64_t ref_seq_len;
     ref_seq_len = count_fasta_file(argv[3]);
     if(ref_seq_len == -1){
@@ -644,7 +645,7 @@ int main(int argc, char **argv) {
                  enc_qdb0, enc_qdb1,
                  query_db_size, readlength,
                  k_l_range0,
-                 batch_size, numthreads, lutput);
+                 batch_size, numthreads, lutput, lutkeysize);
     }
     int64_t endTick = __rdtsc();
 #ifdef VTUNE_ANALYSIS
