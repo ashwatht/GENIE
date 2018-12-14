@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
 
 	if(argc!=5)
 	{
-		printf("Need six arguments : indexfile query_set referencesequence.fa readlength\n");
+		printf("Need four arguments : indexfile query_set referencesequence.fa readlength\n");
 		return 1;
 	}
 	char *query_seq=(char *)malloc(QUERY_DB_SIZE*sizeof(char));
