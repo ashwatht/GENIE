@@ -84,7 +84,7 @@ if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] ||  [ "
   echo "...done compiling"
 fi
 
-if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] || [ "$1" = "run_naive" ];  then
+if [ "$1" == "run_rmi" ] || [ "$1" = "run_lut" ] || [ "$1" = "run_opt" ] || [ $1 = "run_naive" ];  then
   echo "building compressed FM Index..."
   time ./build_bwt_index/bwtbuildbinarybwt $PP_DATA 1 $BWT_FILE $LUT_FILE
   time ./build_bwt_index/bwt-build-with-cp.8bit.32 $BWT_FILE $PP_DATA
@@ -120,7 +120,7 @@ fi
 if [ "$1" = "run_rmi" ]; then
   echo "running RMI implementation on small queries..."
   t=1
-  time ./opt/bwt-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t $RMI_OUTPUT_FILE > $OUTPUT_FILE
+  time ./opt/bwt-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t $RMI_OUTPUT_FILE $SMALL > $OUTPUT_FILE
   echo "...done running"
   cat $OUTPUT_FILE
 fi
@@ -128,7 +128,7 @@ fi
 if [ "$1" = "run_lut" ]; then
   echo "running LUT implementation on small queries..."
   t=1
-  time ./opt/bwt-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t $LUT_OUTPUT_FILE > $OUTPUT_FILE
+  time ./opt/bwt-match-checkpoint.8bit.32 $BWT_FILE $SMALL_QUERY $PP_DATA 24 $SMALL 0 $t $LUT_OUTPUT_FILE 8 > $OUTPUT_FILE
   echo "...done running"
   cat $OUTPUT_FILE
 fi
